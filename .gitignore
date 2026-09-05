@@ -1,0 +1,57 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# env
+.env
+.env.local
+
+# generated data (runtime, not source)
+/data/posts.json
+/public/generated/*
+!/public/generated/.gitkeep
+/data/custom-templates.json
+# NOTE: public/templates/*.png (layout-1/2/3) are committed on purpose —
+# they're pre-generated placeholder backgrounds, not runtime output.
+# Vercel's filesystem is read-only in production so they can't be
+# generated on the fly there; they must exist as real files in the repo.
+/public/templates/custom/*.png
+!/public/templates/custom/.gitkeep
