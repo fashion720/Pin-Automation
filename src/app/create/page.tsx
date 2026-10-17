@@ -564,12 +564,12 @@ export default function CreatePost() {
 
           <div>
             <label className="block text-sm font-medium mb-2">Pin images</label>
-            <label className="block border border-dashed border-border rounded-xl py-10 text-center cursor-pointer hover:border-accent/50 transition">
+            <label className="block relative border border-dashed border-border rounded-xl py-10 text-center cursor-pointer hover:border-accent/50 transition">
               <input
                 type="file"
                 accept="image/png,image/jpeg"
                 multiple
-                className="hidden"
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 onChange={(e) => e.target.files && addManualFiles(e.target.files)}
               />
               <span className="text-muted text-sm">
