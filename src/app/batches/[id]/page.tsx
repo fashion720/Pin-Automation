@@ -37,6 +37,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   const [notesDraft, setNotesDraft] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSavedAt, setNotesSavedAt] = useState<string>("");
+  const [confirmRequest, setConfirmRequest] = useState<{ message: string; resolve: (confirmed: boolean) => void } | null>(null);
 
   useEffect(() => {
     params.then(({ id }) => fetch(`/api/batches/${id}`).then(async (response) => {
@@ -56,9 +57,15 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
     setSelectedPostIds((current) => current.length === payload?.posts.length ? [] : (payload?.posts || []).map((post) => post.id));
   }
 
+  // In-page confirmation dialog — window.confirm() is unreliable in automated
+  // browsers (the native dialog gets blocked, so clicks silently do nothing).
+  function requestConfirm(message: string): Promise<boolean> {
+    return new Promise((resolve) => setConfirmRequest({ message, resolve }));
+  }
+
   async function runBulkAction(action: "delete" | "move") {
     if (!payload || selectedPostIds.length === 0) return;
-    if (action === "delete" && !window.confirm(`Kya aap ${selectedPostIds.length} selected post${selectedPostIds.length === 1 ? "" : "s"} delete karna chahte ho?`)) return;
+    if (action === "delete" && !(await requestConfirm(`Kya aap ${selectedPostIds.length} selected post${selectedPostIds.length === 1 ? "" : "s"} delete karna chahte ho?`))) return;
     if (action === "move" && !targetBatchId) return setBulkMessage("Pehle target batch select karo.");
     setBulkActionLoading(true);
     setBulkMessage("");
@@ -151,7 +158,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
 
   async function deleteCurrentBatch() {
     if (!payload) return;
-    if (!window.confirm(`Kya aap ${payload.batch.name} aur iski ${payload.postCount} posts delete karna chahte ho?`)) return;
+    if (!(await requestConfirm(`Kya aap ${payload.batch.name} aur iski ${payload.postCount} posts delete karna chahte ho?`))) return;
     setDeletingBatch(true);
     setError("");
     try {
@@ -255,6 +262,28 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
           </section>
         ))}
       </div>
+
+      {confirmRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6">
+            <p className="text-sm text-foreground">{confirmRequest.message}</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => { confirmRequest.resolve(false); setConfirmRequest(null); }}
+                className="rounded-full border border-border px-4 py-2 text-sm text-muted transition hover:text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { confirmRequest.resolve(true); setConfirmRequest(null); }}
+                className="rounded-full bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
